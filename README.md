@@ -1,4 +1,13 @@
-<<<<<<< HEAD
+---
+title: Fakejobs Detection Gen Ai Project
+emoji: 🏆
+colorFrom: pink
+colorTo: gray
+sdk: docker
+pinned: false
+short_description: Academic prototype for detecting fake job postings.
+---
+
 # VagaCheck
 
 VagaCheck e uma ferramenta para ajudar pessoas em busca de emprego a identificar sinais de golpe em anuncios de vaga recebidos por WhatsApp, e-mail, redes sociais, LinkedIn ou sites de recrutamento.
@@ -42,12 +51,9 @@ Abra `http://127.0.0.1:8000`.
 
 ## Deploy no Hugging Face Spaces
 
-Este repositorio ja inclui `Dockerfile` para publicar o prototipo como Space.
+Este repositorio inclui `Dockerfile` para publicar o prototipo como Space usando SDK Docker.
 
-1. Crie um novo Space em `https://huggingface.co/spaces`.
-2. Escolha **SDK: Docker**.
-3. Suba os arquivos deste repositorio para o Space.
-4. O Hugging Face executara automaticamente:
+O Hugging Face executa automaticamente:
 
 ```bash
 python scripts/start_hf.py
@@ -55,7 +61,7 @@ python scripts/start_hf.py
 
 O Space usa a porta padrao `7860`, exigida pela plataforma. O script tambem cria dados de exemplo quando o banco SQLite ainda esta vazio.
 
-Para popular exemplos:
+Para popular exemplos localmente:
 
 ```bash
 python scripts/seed_demo.py
@@ -96,7 +102,7 @@ files/
 
 ## Motor de regras
 
-O score soma pesos de red flags como ausencia de logo, ausencia de perfil da empresa, descricao curta, salario incompatível, canal generico, urgencia excessiva e cobranca antecipada. O veredito segue:
+O score soma pesos de red flags como ausencia de logo, ausencia de perfil da empresa, descricao curta, salario incompativel, canal generico, urgencia excessiva e cobranca antecipada. O veredito segue:
 
 - `>= 60`: provavel golpe
 - `>= 30`: atencao
@@ -128,8 +134,4 @@ Na proxima fase, a arquitetura pode evoluir para:
 
 - Algumas especificacoes citadas no indice nao estavam presentes na pasta. Foi necessario inferir fluxos, telas, arquitetura e observabilidade a partir dos arquivos disponiveis e do PDF.
 - A stack recomendada no PDF era FastAPI + React + SQLite, mas as dependencias web nao estavam instaladas. A alternativa com biblioteca padrao foi escolhida para garantir que o projeto rode imediatamente.
-- O projeto ainda nao publica um endpoint publico por conta propria. Para a entrega, exponha a porta local com ngrok ou hospede o repositorio em uma plataforma gratuita.
-
-=======
-# fakejobs_detection_gen_ai_project
->>>>>>> 0963443c138e6a97d921a01f050b9b738d36de1b
+- O projeto nao integra modelo real de IA nesta entrega; o motor atual e deterministico e serve como mock transparente da etapa futura.
