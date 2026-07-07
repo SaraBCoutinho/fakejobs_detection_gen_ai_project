@@ -130,34 +130,6 @@ Na proxima fase, a arquitetura pode evoluir para:
 - A stack recomendada no PDF era FastAPI + React + SQLite, mas as dependencias web nao estavam instaladas. A alternativa com biblioteca padrao foi escolhida para garantir que o projeto rode imediatamente.
 - O projeto ainda nao publica um endpoint publico por conta propria. Para a entrega, exponha a porta local com ngrok ou hospede o repositorio em uma plataforma gratuita.
 
-## Endpoint publico
-
-Para um link estavel, use o Hugging Face Spaces com SDK Docker. Para um link temporario durante a avaliacao, uma opcao simples e rodar:
-
-```bash
-python app.py --host 127.0.0.1 --port 8000
-ngrok http 8000
-```
-
-Use a URL HTTPS gerada pelo ngrok como endpoint funcional.
-
-No Windows, tambem ha scripts prontos:
-
-```powershell
-.\scripts\start_local.ps1
-```
-
-Em outro terminal:
-
-```powershell
-.\scripts\start_ngrok.ps1
-```
-
-Se o ngrok ainda nao estiver configurado, instale em `https://ngrok.com/download` e rode uma vez:
-
-```powershell
-ngrok config add-authtoken SEU_TOKEN
-```
 =======
 # fakejobs_detection_gen_ai_project
 >>>>>>> 0963443c138e6a97d921a01f050b9b738d36de1b
