@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # VagaCheck
 
 VagaCheck e uma ferramenta para ajudar pessoas em busca de emprego a identificar sinais de golpe em anuncios de vaga recebidos por WhatsApp, e-mail, redes sociais, LinkedIn ou sites de recrutamento.
@@ -157,3 +158,6 @@ Se o ngrok ainda nao estiver configurado, instale em `https://ngrok.com/download
 ```powershell
 ngrok config add-authtoken SEU_TOKEN
 ```
+=======
+# fakejobs_detection_gen_ai_project
+>>>>>>> 0963443c138e6a97d921a01f050b9b738d36de1b
