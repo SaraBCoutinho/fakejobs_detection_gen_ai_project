@@ -117,7 +117,7 @@ const loadReports = async () => {
         `,
         )
         .join("")
-    : '<p class="muted">Nenhuma denuncia registrada.</p>';
+    : '<p class="muted">Nenhuma sinalizacao registrada.</p>';
 };
 
 const loadDashboard = async () => {
@@ -125,7 +125,7 @@ const loadDashboard = async () => {
   document.querySelector("#metrics").innerHTML = `
     <div class="metric"><span>Analises</span><strong>${data.total_analises}</strong></div>
     <div class="metric"><span>Score medio</span><strong>${data.score_medio}</strong></div>
-    <div class="metric"><span>Denuncias</span><strong>${data.denuncias}</strong></div>
+    <div class="metric"><span>Sinalizacoes</span><strong>${data.denuncias}</strong></div>
   `;
   const total = Math.max(data.total_analises, 1);
   document.querySelector("#verdict-bars").innerHTML = Object.entries(data.vereditos)
@@ -168,7 +168,7 @@ document.querySelector("#report-form").addEventListener("submit", async (event) 
   event.preventDefault();
   const payload = formToJson(event.currentTarget);
   if (!payload.vaga_id) {
-    toast("Analise uma vaga antes de denunciar");
+    toast("Analise uma vaga antes de sinalizar");
     return;
   }
   await api("/api/denuncias", {
@@ -177,7 +177,7 @@ document.querySelector("#report-form").addEventListener("submit", async (event) 
   });
   event.currentTarget.reset();
   await loadReports();
-  toast("Denuncia registrada");
+  toast("Sinalizacao registrada");
 });
 
 loadHistory().catch(() => {});

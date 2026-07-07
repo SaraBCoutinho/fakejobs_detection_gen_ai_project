@@ -22,7 +22,7 @@ O objetivo do VagaCheck e transformar uma vaga recebida em um veredito claro de 
 - um veredito: `provavel_golpe`, `atencao` ou `provavel_legitima`;
 - uma lista de red flags explicando quais sinais foram encontrados;
 - um historico das analises feitas;
-- uma area para registrar denuncias colaborativas;
+- uma area para registrar sinalizacoes colaborativas;
 - um dashboard simples com indicadores do prototipo.
 
 A ferramenta nao decide juridicamente se uma vaga e fraude. Ela funciona como uma triagem preventiva para ajudar o candidato a perceber sinais suspeitos antes de enviar dados pessoais, pagar taxas ou continuar em um processo seletivo duvidoso.
@@ -37,7 +37,7 @@ Golpes de vaga exploram urgencia, promessa de renda e pedidos de pagamento ou da
 2. Extracao mockada de salario e contato quando possivel.
 3. Motor de regras baseado nas especificacoes do projeto e inspirado no dataset EMSCAD / Real or Fake Job Posting Prediction.
 4. Persistencia local em SQLite.
-5. Historico, denuncia colaborativa e dashboard.
+5. Historico, sinalizacao colaborativa e dashboard.
 
 ## Como rodar
 
@@ -96,7 +96,7 @@ files/
 ## Escolhas de design
 
 - Usei Python padrao, `http.server` e `sqlite3` porque o ambiente local nao tinha FastAPI, Flask, Uvicorn ou Pytest instalados. Isso deixa o prototipo executavel sem baixar dependencias.
-- A UI tem cinco areas navegaveis: analise, historico, denuncias, dashboard e roadmap de IA. Isso atende melhor ao criterio de complexidade do que uma tela unica.
+- A UI tem cinco areas navegaveis: analise, historico, sinalizacoes, dashboard e roadmap de IA. Isso atende melhor ao criterio de complexidade do que uma tela unica.
 - O motor de regras fica isolado em `app/scoring.py`, preparando a substituicao futura por classificador, embeddings ou orquestracao com LangGraph.
 - O banco usa UUID em `TEXT` e datas ISO-8601, seguindo o modelo de dominio especificado.
 
