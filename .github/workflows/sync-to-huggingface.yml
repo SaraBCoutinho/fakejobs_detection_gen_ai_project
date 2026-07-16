@@ -13,17 +13,14 @@ jobs:
     steps:
       - name: Baixar repositório
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          lfs: true
 
-      - name: Instalar cliente Hugging Face
-        run: python -m pip install --upgrade huggingface_hub
-
-      - name: Atualizar Space existente
+      - name: Enviar para o Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          hf upload SaraBCoutinho/fakejobs_detection_gen_ai_project . . \
-            --repo-type space \
-            --exclude=".git*" \
-            --exclude=".github*" \
-            --delete="*" \
-            --commit-message="Atualização automática a partir do GitHub"
+          git push --force \
+            "https://SaraBCoutinho:${HF_TOKEN}@huggingface.co/spaces/SaraBCoutinho/fakejobs_detection_gen_ai_project" \
+            HEAD:main
