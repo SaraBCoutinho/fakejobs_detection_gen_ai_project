@@ -1,11 +1,11 @@
 ---
 title: VagaCheck - IA generativa para triagem de vagas
 emoji: 🛡️
-colorFrom: teal
+colorFrom: green
 colorTo: gray
 sdk: docker
 pinned: false
-short_description: Triagem explicável de ofertas de emprego suspeitas com Ollama e tools.
+short_description: Triagem explicável de vagas suspeitas com IA.
 ---
 
 # VagaCheck
