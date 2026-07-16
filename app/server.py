@@ -7,7 +7,6 @@ from urllib.parse import urlparse
 from app.database import create_analysis, create_report, dashboard, get_analysis, init_db, list_analyses, list_reports
 from app.extractor import build_job_payload
 from app.scoring import evaluate_job
-from agents.risk_agent import MODEL, MODEL_OPTIONS, analyze_with_ai
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -33,13 +32,7 @@ class VagaCheckHandler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:
         path = urlparse(self.path).path
         if path == "/api/health":
-            self.json_response(
-                {
-                    "status": "ok",
-                    "service": "VagaCheck",
-                    "ia": {"provider": "Ollama", "model": MODEL, "options": MODEL_OPTIONS},
-                }
-            )
+            self.json_response({"status": "ok", "service": "VagaCheck"})
             return
         if path == "/api/analises":
             self.json_response({"items": list_analyses()})
@@ -64,18 +57,11 @@ class VagaCheckHandler(SimpleHTTPRequestHandler):
     def do_POST(self) -> None:
         path = urlparse(self.path).path
         if path == "/api/analisar":
-            try:
-                data = self.read_json()
-                if not str(data.get("texto_bruto", "")).strip():
-                    self.json_response({"erro": "texto_bruto é obrigatório"}, HTTPStatus.BAD_REQUEST)
-                    return
-                job = build_job_payload(data)
-                result = evaluate_job(job)
-                result["analise_ia"] = analyze_with_ai(job, result)
-                persisted = create_analysis(job, result)
-                self.json_response(persisted, HTTPStatus.CREATED)
-            except (json.JSONDecodeError, UnicodeDecodeError, ValueError) as exc:
-                self.json_response({"erro": f"Entrada inválida: {exc}"}, HTTPStatus.BAD_REQUEST)
+            data = self.read_json()
+            job = build_job_payload(data)
+            result = evaluate_job(job)
+            persisted = create_analysis(job, result)
+            self.json_response(persisted, HTTPStatus.CREATED)
             return
         if path == "/api/denuncias":
             data = self.read_json()
