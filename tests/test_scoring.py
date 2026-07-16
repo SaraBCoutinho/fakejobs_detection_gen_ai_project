@@ -61,6 +61,28 @@ class ScoringEngineTest(unittest.TestCase):
 
         self.assertEqual(result["veredito"], "atencao")
 
+    def test_reposted_known_scam_adds_specific_flag(self):
+        job = {
+            "title": "Assistente remoto",
+            "description": "Contratação imediata para assistente remoto. Envie PIX para liberar o cadastro.",
+            "company_profile": "",
+            "has_company_logo": False,
+            "has_questions": False,
+        }
+        history = [
+            {
+                "title": "Assistente remoto",
+                "description": "Contratação imediata para assistente remoto. Envie PIX para liberar o cadastro.",
+                "criado_em": "2026-07-15T12:00:00+00:00",
+            }
+        ]
+
+        result = evaluate_job(job, historico_golpes=history)
+
+        flags = {flag["codigo"]: flag for flag in result["red_flags"]}
+        self.assertIn("REPOSTAGEM_DE_GOLPE_CONHECIDO", flags)
+        self.assertIn("100% similar", flags["REPOSTAGEM_DE_GOLPE_CONHECIDO"]["trecho_evidencia"])
+
 
 if __name__ == "__main__":
     unittest.main()
