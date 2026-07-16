@@ -18,7 +18,7 @@ jobs:
         uses: huggingface/hub-sync@v0.1.0
         with:
           github_repo_id: ${{ github.repository }}
-          huggingface_repo_id: SaraBCoutinho/fakejobs_detection_gen_ai_project
+          huggingface_repo_id: https://huggingface.co/spaces/SaraBCoutinho/fakejobs_detection_gen_ai_project
           repo_type: space
           space_sdk: docker
           hf_token: ${{ secrets.HF_TOKEN }}
