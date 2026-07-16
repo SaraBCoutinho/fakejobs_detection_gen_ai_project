@@ -1,18 +1,4 @@
-# Registro de iteração de prompts
-
-## Avaliação final - integração real de IA
-
-### Versão 1: explicação livre após o score
-
-Ideia inicial: enviar as red flags ao modelo e pedir uma explicação. Problema: o contrato ficava implícito e o modelo poderia contradizer o score ou omitir limitações.
-
-### Versão 2: JSON e persona
-
-Foram adicionados persona de analista de segurança, campos de saída e tom não alarmista. Problema: apenas escrever “responda em JSON” não garante JSON parseável nem uso de dados auditáveis.
-
-### Versão 3: tools, schema e proteção de entrada
-
-Versão atual em `prompts/system_prompt.txt`: tool obrigatória para o score, schema de structured output, validação semântica da recomendação, tags XML para isolar a vaga, instrução contra prompt injection e examples contrastivos. O agente limita o fluxo a três ciclos e cai para regras locais em qualquer violação do protocolo.
+# Registro de uso do agente
 
 ## Prompts que funcionaram
 

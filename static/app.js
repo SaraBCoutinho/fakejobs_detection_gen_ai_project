@@ -19,14 +19,6 @@ const api = async (path, options = {}) => {
   return payload;
 };
 
-const escapeHtml = (value) =>
-  String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
 const toast = (message) => {
   const element = document.querySelector("#toast");
   element.textContent = message;
@@ -56,25 +48,6 @@ const formToJson = (form) => {
 
 const renderResult = (analysis) => {
   const flags = analysis.red_flags || [];
-  const ai = analysis.analise_ia;
-  const aiBlock = ai
-    ? `
-      <section class="ai-explanation">
-        <div class="ai-heading">
-          <p class="eyebrow">Explicação assistida</p>
-          <span class="ai-status ${ai.status === "gerada_por_ia" ? "online" : "fallback"}">
-            ${ai.status === "gerada_por_ia" ? `IA local · ${escapeHtml(ai.modelo)}` : "Fallback sem IA"}
-          </span>
-        </div>
-        <p>${escapeHtml(ai.resumo)}</p>
-        <strong>Próximo passo: ${escapeHtml(String(ai.recomendacao).replaceAll("_", " "))}</strong>
-        <h3>O que verificar</h3>
-        <ul>${(ai.pontos_para_verificar || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-        <h3>Limitações</h3>
-        <ul>${(ai.limitacoes || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-        <p class="privacy-note">${escapeHtml(ai.alerta_privacidade)}</p>
-      </section>`
-    : "";
   document.querySelector("#analysis-result").innerHTML = `
     <div class="score-ring" style="--score: ${analysis.score_risco}">
       <strong>${analysis.score_risco}</strong>
@@ -88,16 +61,15 @@ const renderResult = (analysis) => {
             .map(
               (flag) => `
                 <div class="flag">
-                  <strong>${escapeHtml(flag.codigo)} <span>+${escapeHtml(flag.peso)}</span></strong>
-                  <p>${escapeHtml(flag.descricao)}</p>
-                  ${flag.trecho_evidencia ? `<span>Evidência: ${escapeHtml(flag.trecho_evidencia)}</span>` : ""}
+                  <strong>${flag.codigo} <span>+${flag.peso}</span></strong>
+                  <p>${flag.descricao}</p>
+                  ${flag.trecho_evidencia ? `<span>Evidencia: ${flag.trecho_evidencia}</span>` : ""}
                 </div>
               `,
             )
             .join("")
         : '<p class="muted">Nenhuma red flag forte foi disparada.</p>'
     }
-    ${aiBlock}
   `;
 };
 
@@ -110,12 +82,12 @@ const loadHistory = async () => {
         .map(
           (item) => `
           <tr>
-            <td>${escapeHtml(item.title || "Vaga sem titulo")}</td>
-            <td>${escapeHtml(item.fonte)}</td>
-            <td><strong>${escapeHtml(item.score_risco)}</strong></td>
-            <td>${escapeHtml(verdictLabel[item.veredito])}</td>
-            <td>${escapeHtml(item.confianca)}</td>
-            <td><button class="link-button" data-analysis="${escapeHtml(item.id)}">Ver</button></td>
+            <td>${item.title || "Vaga sem titulo"}</td>
+            <td>${item.fonte}</td>
+            <td><strong>${item.score_risco}</strong></td>
+            <td>${verdictLabel[item.veredito]}</td>
+            <td>${item.confianca}</td>
+            <td><button class="link-button" data-analysis="${item.id}">Ver</button></td>
           </tr>
         `,
         )
@@ -128,7 +100,7 @@ const loadReports = async () => {
   state.analyses = analyses.items;
   const select = document.querySelector("#report-vaga-select");
   select.innerHTML = state.analyses.length
-    ? state.analyses.map((item) => `<option value="${escapeHtml(item.vaga_id)}">${escapeHtml(item.title || item.vaga_id)}</option>`).join("")
+    ? state.analyses.map((item) => `<option value="${item.vaga_id}">${item.title || item.vaga_id}</option>`).join("")
     : '<option value="">Analise uma vaga primeiro</option>';
 
   const reports = await api("/api/denuncias");
@@ -138,9 +110,9 @@ const loadReports = async () => {
         .map(
           (item) => `
           <article class="mini-card">
-            <strong>${escapeHtml(item.title)}</strong>
-            <p>${escapeHtml(item.motivo)}</p>
-            <span class="muted">${escapeHtml(item.status)} - score ${escapeHtml(item.score_risco ?? "n/a")}</span>
+            <strong>${item.title}</strong>
+            <p>${item.motivo}</p>
+            <span class="muted">${item.status} - score ${item.score_risco ?? "n/a"}</span>
           </article>
         `,
         )
@@ -175,23 +147,13 @@ document.querySelectorAll(".nav-button").forEach((button) => {
 
 document.querySelector("#analysis-form").addEventListener("submit", async (event) => {
   event.preventDefault();
-  const button = event.currentTarget.querySelector('button[type="submit"]');
-  button.disabled = true;
-  button.textContent = "Analisando…";
-  try {
-    const payload = formToJson(event.currentTarget);
-    const result = await api("/api/analisar", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-    renderResult(result);
-    toast(result.analise_ia?.status === "gerada_por_ia" ? "Análise gerada com IA local" : "Ollama indisponível: regras locais utilizadas");
-  } catch (error) {
-    toast(error.message);
-  } finally {
-    button.disabled = false;
-    button.textContent = "Analisar com IA local";
-  }
+  const payload = formToJson(event.currentTarget);
+  const result = await api("/api/analisar", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  renderResult(result);
+  toast("Analise salva no historico");
 });
 
 document.querySelector("#history-body").addEventListener("click", async (event) => {
