@@ -1,3 +1,4 @@
+import difflib
 import re
 from dataclasses import dataclass, asdict
 
@@ -21,7 +22,35 @@ RED_FLAGS = {
     "COBRANCA_ANTECIPADA": ("Pedido de pagamento antes da contratacao", 30),
     "CANAL_GENERICO": ("Contato usa e-mail generico em vez de dominio proprio", 15),
     "URGENCIA_EXCESSIVA": ("Linguagem de urgencia para pressionar decisao rapida", 10),
+    "TENTATIVA_MANIPULACAO_IA": ("Texto contem instrucao dirigida a um sistema de IA, tipico de tentativa de manipulacao", 25),
+    "REPOSTAGEM_DE_GOLPE_CONHECIDO": ("Texto muito similar a uma vaga ja identificada como golpe no historico local", 30),
 }
+
+# Limiar de similaridade (0 a 1) acima do qual consideramos que a vaga nova é
+# uma repostagem/variação de um golpe já identificado. Golpes costumam ser
+# reaplicados com pequenas variações de texto, então essa checagem é mais forte
+# que uma busca por palavra-chave: compara o texto inteiro, não só um termo.
+REPOST_SIMILARITY_THRESHOLD = 0.72
+
+# Um anúncio de vaga legítimo não tem motivo para se dirigir a um classificador
+# de IA. Ver esse padrão no texto é, ao mesmo tempo, um guardrail de entrada
+# (sinaliza tentativa de prompt injection) e um sinal de má-fé — por isso soma
+# ao score em vez de só ser bloqueado silenciosamente.
+PROMPT_INJECTION_KEYWORDS = (
+    "ignore as instrucoes anteriores",
+    "ignore as instruções anteriores",
+    "ignore instrucoes anteriores",
+    "ignore instruções anteriores",
+    "desconsidere as instrucoes",
+    "desconsidere as instruções",
+    "esqueca suas regras",
+    "esqueça suas regras",
+    "you are now",
+    "aja como",
+    "system:",
+    "nova instrucao:",
+    "nova instrução:",
+)
 
 TITLE_KEYWORDS = (
     "data entry",
@@ -102,7 +131,34 @@ def is_salary_suspicious(salary_range: str, required_experience: str = "", funct
     return bool((juniorish or operational) and monthly_like and high >= 15_000)
 
 
-def evaluate_job(job: dict) -> dict:
+def _similarity(text_a: str, text_b: str) -> float:
+    text_a, text_b = _text(text_a).lower(), _text(text_b).lower()
+    if not text_a or not text_b:
+        return 0.0
+    return difflib.SequenceMatcher(None, text_a, text_b).ratio()
+
+
+def find_similar_flagged_case(
+    job_text: str, historico_golpes: list[dict], threshold: float = REPOST_SIMILARITY_THRESHOLD
+) -> dict | None:
+    """Compara o texto da vaga nova contra cada caso já marcado como golpe.
+    Retorna o melhor match acima do limiar, ou None se nenhum for parecido o
+    suficiente. `historico_golpes` é injetado por quem chama (não há acesso a
+    banco aqui), o que mantém evaluate_job puro e fácil de testar."""
+    melhor: dict | None = None
+    for caso in historico_golpes:
+        texto_caso = f"{caso.get('title', '')} {caso.get('description', '')}"
+        score = _similarity(job_text, texto_caso)
+        if score >= threshold and (melhor is None or score > melhor["similaridade"]):
+            melhor = {
+                "titulo": caso.get("title") or "(sem título)",
+                "criado_em": caso.get("criado_em"),
+                "similaridade": round(score, 2),
+            }
+    return melhor
+
+
+def evaluate_job(job: dict, historico_golpes: list[dict] | None = None) -> dict:
     flags: list[RedFlagResult] = []
 
     def add(code: str, evidence: str | None = None) -> None:
@@ -154,6 +210,18 @@ def evaluate_job(job: dict) -> dict:
     urgency_match = _contains_any(combined_text, URGENCY_KEYWORDS)
     if urgency_match:
         add("URGENCIA_EXCESSIVA", urgency_match)
+
+    injection_match = _contains_any(combined_text, PROMPT_INJECTION_KEYWORDS)
+    if injection_match:
+        add("TENTATIVA_MANIPULACAO_IA", injection_match)
+
+    repost_match = find_similar_flagged_case(f"{title} {description}", historico_golpes or [])
+    if repost_match:
+        evidencia = (
+            f"{int(repost_match['similaridade'] * 100)}% similar a \"{repost_match['titulo']}\" "
+            f"({repost_match['criado_em']})"
+        )
+        add("REPOSTAGEM_DE_GOLPE_CONHECIDO", evidencia)
 
     score = min(100, sum(flag.peso for flag in flags))
     if score >= 60:
