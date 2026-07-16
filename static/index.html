@@ -17,7 +17,7 @@
         <button class="nav-button" data-view="historico">Historico</button>
         <button class="nav-button" data-view="denuncias">Sinalizacoes</button>
         <button class="nav-button" data-view="dashboard">Dashboard</button>
-        <button class="nav-button" data-view="roadmap">IA futura</button>
+        <button class="nav-button" data-view="roadmap">Engenharia de IA</button>
       </nav>
     </header>
 
@@ -109,14 +109,14 @@ Contato: recrutamentovip@gmail.com</textarea>
               <label><input type="checkbox" name="has_questions" /> Tem perguntas de triagem</label>
             </div>
 
-            <button class="primary" type="submit">Gerar veredito</button>
+            <button class="primary" type="submit">Analisar com IA local</button>
           </form>
 
           <aside class="result-panel" id="analysis-result">
             <div class="empty-state">
               <p class="eyebrow">Resultado</p>
               <h2>O veredito aparece aqui</h2>
-              <p>O motor atual usa regras transparentes e persistencia local em SQLite.</p>
+              <p>O agente combina regras transparentes com uma explicação gerada por modelo local.</p>
             </div>
           </aside>
         </div>
@@ -186,15 +186,15 @@ Contato: recrutamentovip@gmail.com</textarea>
       <section class="view" id="view-roadmap">
         <div class="roadmap">
           <div>
-            <p class="eyebrow">Sem LLM nesta entrega</p>
-            <h1>Onde a IA entra depois</h1>
-            <p>O prototipo atual separa regras, extracao e persistencia para que a fase futura possa substituir partes por embeddings, classificador Transformer, modelo local via Ollama e orquestracao com LangGraph.</p>
+            <p class="eyebrow">LLM local + ferramentas</p>
+            <h1>Como a IA participa</h1>
+            <p>O agente usa o Ollama para gerar uma explicação estruturada. O score continua sendo calculado por uma ferramenta determinística: o modelo explica as evidências, mas não pode alterar o veredito.</p>
           </div>
           <ol>
-            <li><strong>Embeddings:</strong> comparar vagas novas com casos confirmados.</li>
-            <li><strong>Classificador:</strong> treinar no dataset EMSCAD e dados brasileiros.</li>
-            <li><strong>Ollama:</strong> gerar explicacoes locais preservando privacidade.</li>
-            <li><strong>LangGraph:</strong> orquestrar extracao, verificacao e consolidacao.</li>
+            <li><strong>Prompt protegido:</strong> a vaga é delimitada como dado não confiável para reduzir prompt injection.</li>
+            <li><strong>Tool calling:</strong> o agente precisa chamar <code>calcular_risco_vaga</code> antes de responder.</li>
+            <li><strong>Saída estruturada:</strong> resumo, recomendação, verificações, limitações e alerta de privacidade.</li>
+            <li><strong>Fallback:</strong> se o Ollama falhar, a análise determinística continua disponível e a interface informa isso.</li>
           </ol>
         </div>
       </section>

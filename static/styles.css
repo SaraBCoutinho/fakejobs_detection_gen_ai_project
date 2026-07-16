@@ -214,6 +214,11 @@ textarea:focus {
   background: var(--accent-dark);
 }
 
+.primary:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .result-panel {
   position: sticky;
   top: 94px;
@@ -273,6 +278,55 @@ textarea:focus {
 .flag span,
 .muted {
   color: var(--muted);
+}
+
+.ai-explanation {
+  margin-top: 20px;
+  border-top: 2px solid var(--accent);
+  padding-top: 18px;
+}
+
+.ai-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ai-status {
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.ai-status.online {
+  background: #dcfce7;
+  color: var(--good);
+}
+
+.ai-status.fallback {
+  background: #fef3c7;
+  color: var(--warn);
+}
+
+.ai-explanation h3 {
+  margin: 18px 0 6px;
+  font-size: 0.9rem;
+}
+
+.ai-explanation ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.privacy-note {
+  margin: 18px 0 0;
+  border-radius: 6px;
+  background: #fef3c7;
+  color: #78350f;
+  padding: 10px 12px;
+  font-weight: 700;
 }
 
 .table-wrap {

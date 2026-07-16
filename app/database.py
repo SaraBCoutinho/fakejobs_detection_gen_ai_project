@@ -1,3 +1,4 @@
+import json
 import sqlite3
 import uuid
 from datetime import datetime, timezone
@@ -66,6 +67,7 @@ def init_db() -> None:
                 score_risco INTEGER NOT NULL,
                 veredito TEXT NOT NULL,
                 confianca TEXT NOT NULL,
+                analise_ia_json TEXT,
                 criado_em TEXT NOT NULL,
                 FOREIGN KEY(vaga_id) REFERENCES vagas(id) ON DELETE CASCADE
             );
@@ -96,6 +98,9 @@ def init_db() -> None:
             CREATE INDEX IF NOT EXISTS idx_flags_analise ON red_flags(analise_id);
             """
         )
+        columns = {row[1] for row in db.execute("PRAGMA table_info(analises)").fetchall()}
+        if "analise_ia_json" not in columns:
+            db.execute("ALTER TABLE analises ADD COLUMN analise_ia_json TEXT")
         db.execute(
             """
             INSERT OR IGNORE INTO usuarios (id, nome, email, criado_em)
@@ -147,10 +152,18 @@ def create_analysis(job: dict, result: dict) -> dict:
         )
         db.execute(
             """
-            INSERT INTO analises (id, vaga_id, score_risco, veredito, confianca, criado_em)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO analises (id, vaga_id, score_risco, veredito, confianca, analise_ia_json, criado_em)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
-            (analise_id, vaga_id, result["score_risco"], result["veredito"], result["confianca"], created),
+            (
+                analise_id,
+                vaga_id,
+                result["score_risco"],
+                result["veredito"],
+                result["confianca"],
+                json.dumps(result.get("analise_ia"), ensure_ascii=False) if result.get("analise_ia") else None,
+                created,
+            ),
         )
         db.executemany(
             """
@@ -185,6 +198,8 @@ def get_analysis(analysis_id: str) -> dict:
     if not analysis:
         raise KeyError(analysis_id)
     item = analysis[0]
+    raw_ai = item.pop("analise_ia_json", None)
+    item["analise_ia"] = json.loads(raw_ai) if raw_ai else None
     item["red_flags"] = rows(
         "SELECT codigo, descricao, peso, trecho_evidencia FROM red_flags WHERE analise_id = ? ORDER BY peso DESC",
         (analysis_id,),
@@ -201,6 +216,21 @@ def list_analyses() -> list[dict]:
         JOIN vagas v ON v.id = a.vaga_id
         ORDER BY a.criado_em DESC
         """
+    )
+
+
+def search_local_cases(term: str, limit: int = 3) -> list[dict]:
+    pattern = f"%{term}%"
+    return rows(
+        """
+        SELECT v.title, v.fonte, a.score_risco, a.veredito, a.criado_em
+        FROM analises a
+        JOIN vagas v ON v.id = a.vaga_id
+        WHERE v.title LIKE ? OR v.description LIKE ? OR v.canal_contato LIKE ?
+        ORDER BY a.criado_em DESC
+        LIMIT ?
+        """,
+        (pattern, pattern, pattern, max(1, min(5, int(limit)))),
     )
 
 
